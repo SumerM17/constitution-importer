@@ -31,8 +31,14 @@ const fetchLegalNews = async () => {
 };
 
 export const useLegalNews = () => {
-  return useQuery({
+  const query = useQuery({
     queryKey: ["legalNews"],
     queryFn: fetchLegalNews,
   });
+  
+  return {
+    news: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error
+  };
 };

@@ -11,6 +11,8 @@ import Amendments from "./pages/Amendments";
 import About from "./pages/About";
 import StudentMode from "./components/StudentMode";
 import NotFound from "./pages/NotFound";
+import StateConstitution from "./pages/StateConstitution";
+import Ministers from "./pages/Ministers";
 
 const queryClient = new QueryClient();
 
@@ -27,7 +29,9 @@ const App = () => (
           <Route path="/amendments" element={<Amendments />} />
           <Route path="/about" element={<About />} />
           <Route path="/student-mode" element={<StudentMode />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/state-constitution" element={<StateConstitution />} />
+          <Route path="/state-constitution/:stateCode" element={<StateConstitution />} />
+          <Route path="/ministers" element={<Ministers />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
@@ -36,4 +40,3 @@ const App = () => (
 );
 
 export default App;
-

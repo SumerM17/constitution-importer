@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -9,6 +8,7 @@ import Footer from "@/components/Footer";
 import { ChevronDown, BookOpen, Scale, Search, History, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import LegalNewsCorner from "@/components/LegalNewsCorner";
 
 const Index = () => {
   // Scroll down function for the hero button
@@ -118,64 +118,24 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Student Mode Banner */}
-        <motion.section 
-          className="py-12 px-4 my-8"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-        >
+        {/* Legal News Corner */}
+        <section className="py-12 px-4 bg-muted/20">
           <div className="container mx-auto">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-xl overflow-hidden shadow-xl">
-              <div className="flex flex-col md:flex-row items-center">
-                <div className="md:w-1/2 p-8 md:p-12">
-                  <div className="mb-2 flex items-center">
-                    <Sparkles className="text-blue-500 mr-2 h-6 w-6 animate-pulse" />
-                    <span className="text-blue-600 text-sm font-medium">For Young Learners</span>
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-bold mb-4">Constitution for Kids</h2>
-                  <p className="text-gray-700 mb-6">
-                    A special interactive mode designed for students under 13 to learn about the Constitution of India through fun, animated lessons and simple explanations.
-                  </p>
-                  <Link to="/student-mode">
-                    <Button className="hover-lift bg-blue-600 hover:bg-blue-700">
-                      Enter Student Mode
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-                <div className="md:w-1/2 p-6 flex justify-center">
-                  <div className="relative w-64 h-64">
-                    <motion.div 
-                      className="absolute w-32 h-32 bg-blue-200 rounded-lg rotate-6 top-8 left-8"
-                      animate={{ rotate: [6, 0, 6] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                    <motion.div 
-                      className="absolute w-24 h-24 bg-green-200 rounded-lg -rotate-12 top-24 left-32"
-                      animate={{ rotate: [-12, 0, -12] }}
-                      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                    />
-                    <motion.div 
-                      className="absolute w-28 h-28 bg-yellow-200 rounded-lg rotate-12 top-16 left-20"
-                      animate={{ rotate: [12, 0, 12] }}
-                      transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    />
-                    <motion.div 
-                      className="absolute inset-0 flex items-center justify-center"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.3, duration: 0.5 }}
-                    >
-                      <BookOpen className="h-24 w-24 text-blue-600 animate-float" />
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-3xl mx-auto text-center mb-12"
+            >
+              <h2 className="text-3xl font-bold font-serif mb-4">Today's Legal Updates</h2>
+              <p className="text-muted-foreground">Stay informed with the latest legal developments and constitutional matters.</p>
+            </motion.div>
+            
+            <div className="max-w-4xl mx-auto">
+              <LegalNewsCorner />
             </div>
           </div>
-        </motion.section>
+        </section>
         
         <ArticleViewer />
         
@@ -232,4 +192,3 @@ const Index = () => {
 };
 
 export default Index;
-

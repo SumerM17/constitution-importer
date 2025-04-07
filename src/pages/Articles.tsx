@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { SearchIcon, Filter, Phone, Car, ShieldAlert, Child, Heart, CircleHelp, ExternalLink } from "lucide-react";
+import { SearchIcon, Filter, Phone, Car, ShieldAlert, BabyIcon, Heart, CircleHelp, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 const lawCategories = [
   { id: "traffic", name: "Traffic & Road Safety Laws", icon: <Car className="h-5 w-5" /> },
   { id: "women", name: "Women's Safety & Rights", icon: <Heart className="h-5 w-5" /> },
-  { id: "children", name: "Children's Rights & Protection", icon: <Child className="h-5 w-5" /> },
+  { id: "children", name: "Children's Rights & Protection", icon: <BabyIcon className="h-5 w-5" /> },
   { id: "accident", name: "Accident & Compensation", icon: <ShieldAlert className="h-5 w-5" /> },
   { id: "helpline", name: "Important Helplines", icon: <Phone className="h-5 w-5" /> },
   { id: "general", name: "General Knowledge", icon: <CircleHelp className="h-5 w-5" /> },

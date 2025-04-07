@@ -7,24 +7,38 @@ const fetchLegalNews = async () => {
   
   return [
     {
-      title: "Supreme Court Issues New Guidelines on Bail Applications",
-      summary: "The Supreme Court has released comprehensive guidelines for handling bail applications across all courts in India.",
-      source: "Legal Times",
-      date: "2024-03-15",
+      title: "New Traffic Rules: Increased Penalties for Mobile Phone Usage While Driving",
+      summary: "The government has announced stricter penalties for using mobile phones while driving, with fines now ranging from ₹5,000 to ₹10,000.",
+      source: "Road Safety Times",
+      date: "2025-04-06",
       url: "#"
     },
     {
-      title: "Parliament Passes Criminal Law Reform Bill",
-      summary: "Major overhaul of criminal laws approved with new provisions for faster trials and victim protection.",
-      source: "Law Journal",
-      date: "2024-03-14",
+      title: "Supreme Court Strengthens Women's Rights in Property Inheritance",
+      summary: "Landmark judgment grants equal inheritance rights to daughters in ancestral property, regardless of when they were born.",
+      source: "Legal Rights Today",
+      date: "2025-04-05",
       url: "#"
     },
     {
-      title: "High Courts to Implement AI for Case Management",
-      summary: "Digital transformation initiative announced to reduce case pendency using artificial intelligence.",
-      source: "Tech Law Today",
-      date: "2024-03-13",
+      title: "New Child Protection Law Comes into Effect",
+      summary: "The POCSO Amendment Act introduces stricter punishment for sexual offenses against children and expedites trial procedures.",
+      source: "Child Rights Forum",
+      date: "2025-04-04",
+      url: "#"
+    },
+    {
+      title: "Consumer Courts Now Accept Online Complaints",
+      summary: "Digital initiative allows consumers to file complaints electronically, reducing the need for physical appearances in minor disputes.",
+      source: "Consumer Affairs Daily",
+      date: "2025-04-03",
+      url: "#"
+    },
+    {
+      title: "Nationwide Awareness Campaign on Senior Citizens' Rights Launched",
+      summary: "Government launches program to educate elderly citizens about their legal rights and available support services.",
+      source: "Elder Care Network",
+      date: "2025-04-01",
       url: "#"
     }
   ];

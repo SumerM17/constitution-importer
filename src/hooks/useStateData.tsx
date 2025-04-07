@@ -1,5 +1,5 @@
-
 import { useQuery } from "@tanstack/react-query";
+import { INDIAN_STATES } from "@/lib/constants";
 
 // Temporary mock data - Replace with actual API call
 const fetchStateData = async (stateCode: string) => {

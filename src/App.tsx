@@ -13,6 +13,7 @@ import StudentMode from "./components/StudentMode";
 import NotFound from "./pages/NotFound";
 import StateConstitution from "./pages/StateConstitution";
 import Ministers from "./pages/Ministers";
+import ChatBot from "./pages/ChatBot";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/state-constitution" element={<StateConstitution />} />
           <Route path="/state-constitution/:stateCode" element={<StateConstitution />} />
           <Route path="/ministers" element={<Ministers />} />
+          <Route path="/chatbot" element={<ChatBot />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

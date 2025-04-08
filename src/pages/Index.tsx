@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -5,7 +6,7 @@ import Hero from "@/components/Hero";
 import ArticleViewer from "@/components/ArticleViewer";
 import SearchBar from "@/components/SearchBar";
 import Footer from "@/components/Footer";
-import { ChevronDown, BookOpen, Scale, Search, History, Sparkles, ArrowRight } from "lucide-react";
+import { ChevronDown, BookOpen, Scale, Search, History, Sparkles, ArrowRight, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import LegalNewsCorner from "@/components/LegalNewsCorner";
@@ -89,10 +90,10 @@ const Index = () => {
                   link: "/preamble"
                 },
                 {
-                  icon: <History className="h-10 w-10 text-legal-accent" />,
-                  title: "Historical Context",
-                  description: "Learn about the drafting process and historical background of the Constitution.",
-                  link: "/amendments"
+                  icon: <MessageSquare className="h-10 w-10 text-legal-accent" />,
+                  title: "Legal Assistant",
+                  description: "Chat with our AI legal assistant to get guidance on laws relevant to your situation.",
+                  link: "/chatbot"
                 }
               ].map((feature, index) => (
                 <motion.div

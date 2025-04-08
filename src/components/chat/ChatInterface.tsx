@@ -16,7 +16,7 @@ const ChatInterface = () => {
     messages: [
       {
         id: "welcome",
-        content: "Welcome to Legal Assistant! How can I help you with legal information today?",
+        content: "Welcome to Legal Assistant! How can I help you with legal information today? You can ask about traffic laws, workplace rights, domestic issues, or other legal concerns.",
         sender: "bot",
         timestamp: new Date()
       }
@@ -27,6 +27,16 @@ const ChatInterface = () => {
   const [inputValue, setInputValue] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Predefined prompts to help users get started
+  const suggestedPrompts = [
+    "What are the penalties for traffic signal violations?",
+    "What should I do after a road accident?",
+    "What laws protect women from workplace harassment?",
+    "What are my rights in a domestic violence situation?",
+    "What compensation can I claim for a workplace injury?"
+  ];
   
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -34,6 +44,13 @@ const ChatInterface = () => {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatState.messages]);
+  
+  // Focus the input field when the component mounts
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
   
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,8 +94,30 @@ const ChatInterface = () => {
       if (laws.length > 0) {
         // Store laws in sessionStorage for display in suggestions
         sessionStorage.setItem("suggestedLaws", JSON.stringify(laws));
+      } else {
+        // If no laws found, provide helpful feedback after a moment
+        if (userMessage.content.length < 10) {
+          setTimeout(() => {
+            const helpfulTip: ChatMessage = {
+              id: generateUniqueId(),
+              content: "Try providing more details in your question to help me find relevant laws for your situation.",
+              sender: "bot",
+              timestamp: new Date()
+            };
+            
+            setChatState(prev => ({
+              ...prev,
+              messages: [...prev.messages, helpfulTip]
+            }));
+          }, 1500);
+        }
       }
     }, 1000);
+  };
+  
+  const handlePromptClick = (prompt: string) => {
+    setInputValue(prompt);
+    inputRef.current?.focus();
   };
   
   return (
@@ -154,9 +193,28 @@ const ChatInterface = () => {
       
       <LawSuggestion />
       
+      {/* Suggested prompts */}
+      {chatState.messages.length < 3 && (
+        <div className="p-3 border-t">
+          <p className="text-xs text-muted-foreground mb-2">Try asking about:</p>
+          <div className="flex flex-wrap gap-2">
+            {suggestedPrompts.map((prompt, index) => (
+              <button 
+                key={index}
+                onClick={() => handlePromptClick(prompt)}
+                className="text-xs bg-muted hover:bg-muted/80 px-3 py-1.5 rounded-full text-foreground transition-colors"
+              >
+                {prompt.length > 30 ? `${prompt.substring(0, 30)}...` : prompt}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      
       <form onSubmit={handleSendMessage} className="p-4 border-t bg-background">
         <div className="flex gap-2">
           <Input
+            ref={inputRef}
             placeholder="Ask about your legal question..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}

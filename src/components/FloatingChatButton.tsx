@@ -1,6 +1,6 @@
 
 import React from "react";
-import { MessageSquare } from "lucide-react";
+import { Bot } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -23,7 +23,7 @@ const FloatingChatButton = () => {
           className="h-14 w-14 rounded-full bg-legal-accent hover:bg-legal-accent/90 text-white shadow-lg"
           aria-label="Chat with Legal Assistant"
         >
-          <MessageSquare className="h-6 w-6" />
+          <Bot className="h-6 w-6" />
         </Button>
       </Link>
     </motion.div>

@@ -11,18 +11,42 @@ export const findRelevantLaws = (query: string): Law[] => {
   
   const scoreMap: Map<Law, number> = new Map();
   
-  // Score each law based on keyword matches
+  // Score each law based on keyword matches with improved algorithm
   practicalLawsData.forEach(law => {
     let score = 0;
     const lawText = `${law.title} ${law.category} ${law.summary} ${law.content}`.toLowerCase();
     
+    // Check for exact phrase matches first (higher priority)
+    if (lawText.includes(query.toLowerCase())) {
+      score += 10; // Significant bonus for exact phrase match
+    }
+
+    // Then check for individual keywords
     keywords.forEach(keyword => {
       if (keyword.length <= 2) return; // Skip very short words
+      
+      // Weight matches by keyword importance
+      const keywordWeight = getKeywordWeight(keyword);
+      
       if (lawText.includes(keyword)) {
-        score += 1;
-        // Bonus points for title matches
+        score += keywordWeight;
+        
+        // Boost title matches
         if (law.title.toLowerCase().includes(keyword)) {
+          score += 3;
+        }
+        
+        // Boost category matches
+        if (law.category.toLowerCase() === keyword || 
+            law.category.toLowerCase().includes(keyword)) {
           score += 2;
+        }
+        
+        // Boost content specifics
+        if (law.content.toLowerCase().includes(keyword)) {
+          // Count multiple occurrences of a keyword
+          const occurrences = (law.content.toLowerCase().match(new RegExp(keyword, 'g')) || []).length;
+          score += Math.min(occurrences, 3); // Cap at 3 to prevent overweighting
         }
       }
     });
@@ -41,17 +65,60 @@ export const findRelevantLaws = (query: string): Law[] => {
   return sortedLaws;
 };
 
+// Helper function to assign weights to keywords based on legal relevance
+const getKeywordWeight = (keyword: string): number => {
+  // Legal terms have higher weights
+  const legalTerms = ["law", "legal", "right", "compensation", "fine", "penalty", "violation", 
+    "court", "protection", "act", "victim", "accident", "harassment", "safety", "traffic", "vehicle"];
+    
+  if (legalTerms.includes(keyword)) {
+    return 2;
+  }
+  
+  return 1;
+};
+
 export const generateBotResponse = (query: string): { message: string; laws: Law[] } => {
   const relevantLaws = findRelevantLaws(query);
   
+  // Improved response generation with more context awareness
   if (relevantLaws.length === 0) {
+    // No laws found, provide a helpful response
+    const generalResponses = [
+      "I couldn't find specific laws related to your query. Could you please provide more details about your situation?",
+      "I don't have specific legal information on that topic. Could you rephrase your question or provide more context?",
+      "I'm not finding relevant laws for that query. Could you tell me more about the specific legal issue you're concerned about?"
+    ];
+    
     return {
-      message: "I couldn't find specific laws related to your query. Could you please provide more details or try a different question?",
+      message: generalResponses[Math.floor(Math.random() * generalResponses.length)],
       laws: []
     };
   }
   
-  const botMessage = `Based on your query, here are some relevant laws that might help:`;
+  // Generate a contextual response based on the query and found laws
+  const queryLowerCase = query.toLowerCase();
+  let botMessage = "";
+  
+  // Check for question types to provide more tailored responses
+  if (queryLowerCase.includes("how") || queryLowerCase.includes("what should")) {
+    botMessage = "Based on your question, here's some guidance from relevant laws:";
+  } 
+  else if (queryLowerCase.includes("compensation") || queryLowerCase.includes("claim")) {
+    botMessage = "Regarding compensation options, these laws might be relevant to your situation:";
+  }
+  else if (queryLowerCase.includes("traffic") || queryLowerCase.includes("driving") || queryLowerCase.includes("road")) {
+    botMessage = "For your traffic-related query, here are the relevant regulations:";
+  }
+  else if (queryLowerCase.includes("rights") || queryLowerCase.includes("entitled")) {
+    botMessage = "Concerning your rights in this situation, please refer to these laws:";
+  }
+  else if (queryLowerCase.includes("penalty") || queryLowerCase.includes("punishment") || queryLowerCase.includes("fine")) {
+    botMessage = "Regarding penalties for this situation, these laws outline the possible consequences:";
+  }
+  else {
+    botMessage = "Based on your query, here are some relevant laws that might help:";
+  }
   
   return {
     message: botMessage,

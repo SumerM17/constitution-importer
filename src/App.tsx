@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import StateConstitution from "./pages/StateConstitution";
 import Ministers from "./pages/Ministers";
 import ChatBot from "./pages/ChatBot";
+import FloatingChatButton from "./components/FloatingChatButton";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/chatbot" element={<ChatBot />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <FloatingChatButton />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

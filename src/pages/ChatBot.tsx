@@ -4,8 +4,23 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChatInterface from "@/components/chat/ChatInterface";
 import { motion } from "framer-motion";
+import FloatingChatButton from "@/components/FloatingChatButton";
 
 const ChatBot = () => {
+  // Hide the floating button when we're on the chat page
+  React.useEffect(() => {
+    const floatingButton = document.querySelector('.fixed.bottom-6.right-6');
+    if (floatingButton) {
+      floatingButton.classList.add('hidden');
+    }
+    
+    return () => {
+      if (floatingButton) {
+        floatingButton.classList.remove('hidden');
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />

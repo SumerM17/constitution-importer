@@ -3,8 +3,17 @@ import React from "react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
+  // Function to scroll to the search section
+  const scrollToSearch = () => {
+    const searchSection = document.getElementById("search-section");
+    if (searchSection) {
+      searchSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20 px-4">
       {/* Background Pattern */}
@@ -32,11 +41,13 @@ const Hero = () => {
             </p>
             
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="gap-2 group">
-                Start Reading
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-              <Button size="lg" variant="outline">
+              <Link to="/articles">
+                <Button size="lg" className="gap-2 group">
+                  Start Reading
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+              <Button size="lg" variant="outline" onClick={scrollToSearch}>
                 Learn More
               </Button>
             </div>

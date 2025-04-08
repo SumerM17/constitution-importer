@@ -1,12 +1,15 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Search, BookOpen } from "lucide-react";
+import { Menu, X, Search, BookOpen, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/hooks/useTheme";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +25,24 @@ const Navbar = () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  const handleSearchToggle = () => {
+    setIsSearchOpen(!isSearchOpen);
+    // Scroll to search section if on homepage
+    if (window.location.pathname === '/') {
+      const searchSection = document.querySelector('#search-section');
+      if (searchSection) {
+        searchSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Navigate to home page search section
+      window.location.href = '/#search-section';
+    }
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   return (
     <header
@@ -75,15 +96,23 @@ const Navbar = () => {
             >
               About
             </Link>
-            <Button variant="ghost" size="icon" className="ml-2">
-              <Search className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="icon" onClick={handleSearchToggle}>
+                <Search className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="ml-2">
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+            </div>
           </nav>
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center space-x-2">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleSearchToggle}>
               <Search className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={toggleTheme}>
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
             <Button
               variant="ghost"

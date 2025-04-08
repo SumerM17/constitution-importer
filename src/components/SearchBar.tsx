@@ -50,7 +50,7 @@ const SearchBar = () => {
   };
 
   return (
-    <section className="py-20 px-4 bg-muted/50">
+    <section id="search-section" className="py-20 px-4 bg-muted/50">
       <div className="container mx-auto">
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm">

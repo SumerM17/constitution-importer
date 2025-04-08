@@ -1,11 +1,18 @@
 
 import React from "react";
 import { Bot } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 const FloatingChatButton = () => {
+  const location = useLocation();
+  
+  // Don't show the button on the chatbot page
+  if (location.pathname === "/chatbot") {
+    return null;
+  }
+  
   return (
     <motion.div
       className="fixed bottom-6 right-6 z-50"

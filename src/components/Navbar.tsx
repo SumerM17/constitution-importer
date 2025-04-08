@@ -48,9 +48,9 @@ const Navbar = () => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "py-2 glass border-b shadow-sm"
+          ? "py-2 bg-background/90 backdrop-blur-md border-b shadow-sm"
           : "py-4 bg-transparent"
-      }`}
+      } ${theme === 'dark' ? 'dark:border-slate-800' : ''}`}
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">
@@ -58,7 +58,7 @@ const Navbar = () => {
             to="/"
             className="flex items-center space-x-2 transition-transform hover:scale-[1.02]"
           >
-            <BookOpen className="h-6 w-6 text-india-saffron" />
+            <BookOpen className="h-6 w-6 text-accent" />
             <span className="text-xl font-serif font-medium">
               भारत का संविधान
             </span>
@@ -68,31 +68,31 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
-              className="text-sm font-medium hover:text-india-saffron transition-colors"
+              className="text-sm font-medium hover:text-accent transition-colors"
             >
               Home
             </Link>
             <Link
               to="/preamble"
-              className="text-sm font-medium hover:text-india-saffron transition-colors"
+              className="text-sm font-medium hover:text-accent transition-colors"
             >
               Preamble
             </Link>
             <Link
               to="/articles"
-              className="text-sm font-medium hover:text-india-saffron transition-colors"
+              className="text-sm font-medium hover:text-accent transition-colors"
             >
               Articles
             </Link>
             <Link
               to="/amendments"
-              className="text-sm font-medium hover:text-india-saffron transition-colors"
+              className="text-sm font-medium hover:text-accent transition-colors"
             >
               Amendments
             </Link>
             <Link
               to="/about"
-              className="text-sm font-medium hover:text-india-saffron transition-colors"
+              className="text-sm font-medium hover:text-accent transition-colors"
             >
               About
             </Link>
@@ -138,35 +138,35 @@ const Navbar = () => {
         <div className="flex flex-col p-8 pt-24 space-y-6 h-full">
           <Link
             to="/"
-            className="text-lg font-medium hover:text-india-saffron transition-colors"
+            className="text-lg font-medium hover:text-accent transition-colors"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Home
           </Link>
           <Link
             to="/preamble"
-            className="text-lg font-medium hover:text-india-saffron transition-colors"
+            className="text-lg font-medium hover:text-accent transition-colors"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Preamble
           </Link>
           <Link
             to="/articles"
-            className="text-lg font-medium hover:text-india-saffron transition-colors"
+            className="text-lg font-medium hover:text-accent transition-colors"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Articles
           </Link>
           <Link
             to="/amendments"
-            className="text-lg font-medium hover:text-india-saffron transition-colors"
+            className="text-lg font-medium hover:text-accent transition-colors"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Amendments
           </Link>
           <Link
             to="/about"
-            className="text-lg font-medium hover:text-india-saffron transition-colors"
+            className="text-lg font-medium hover:text-accent transition-colors"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             About

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Car, BabyIcon, Heart, ShieldAlert, Phone, CircleHelp } from "lucide-react";
+import { Car, Baby as BabyIcon, Heart, ShieldAlert, Phone, CircleHelp } from "lucide-react";
 import { LawCategory } from "@/types/law-types";
 
 // Updated categories focused on everyday laws

@@ -81,7 +81,6 @@ const getKeywordWeight = (keyword: string): number => {
 export const generateBotResponse = (query: string): { message: string; laws: Law[] } => {
   const relevantLaws = findRelevantLaws(query);
   
-  // Improved response generation with more context awareness
   if (relevantLaws.length === 0) {
     // No laws found, provide a helpful response
     const generalResponses = [
@@ -96,32 +95,9 @@ export const generateBotResponse = (query: string): { message: string; laws: Law
     };
   }
   
-  // Generate a contextual response based on the query and found laws
-  const queryLowerCase = query.toLowerCase();
-  let botMessage = "";
-  
-  // Check for question types to provide more tailored responses
-  if (queryLowerCase.includes("how") || queryLowerCase.includes("what should")) {
-    botMessage = "Based on your question, here's some guidance from relevant laws:";
-  } 
-  else if (queryLowerCase.includes("compensation") || queryLowerCase.includes("claim")) {
-    botMessage = "Regarding compensation options, these laws might be relevant to your situation:";
-  }
-  else if (queryLowerCase.includes("traffic") || queryLowerCase.includes("driving") || queryLowerCase.includes("road")) {
-    botMessage = "For your traffic-related query, here are the relevant regulations:";
-  }
-  else if (queryLowerCase.includes("rights") || queryLowerCase.includes("entitled")) {
-    botMessage = "Concerning your rights in this situation, please refer to these laws:";
-  }
-  else if (queryLowerCase.includes("penalty") || queryLowerCase.includes("punishment") || queryLowerCase.includes("fine")) {
-    botMessage = "Regarding penalties for this situation, these laws outline the possible consequences:";
-  }
-  else {
-    botMessage = "Based on your query, here are some relevant laws that might help:";
-  }
-  
+  // Always use the standard response message regardless of query content
   return {
-    message: botMessage,
+    message: "Based on your query, here are some relevant laws that might help:",
     laws: relevantLaws
   };
 };

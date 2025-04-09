@@ -124,17 +124,17 @@ const About = () => {
                 {
                   name: "Pratik Khamkar",
                   role: "Data Collection",
-                  image: "https://randomuser.me/api/portraits/men/44.jpg"
+                  image: "https://randomuser.me/api/portraits/men/25.jpg"
                 },
                 {
                   name: "Nandini Vernekar",
                   role: "Lead Developer",
-                  image: "https://randomuser.me/api/portraits/women/66.jpg"
+                  image: "https://randomuser.me/api/portraits/women/30.jpg"
                 },
                 {
                   name: "Mrunmayee Torve",
                   role: "UX Designer",
-                  image: "https://randomuser.me/api/portraits/women/79.jpg"
+                  image: "https://randomuser.me/api/portraits/women/.jpg"
                 },
                 {
                   name: "Sumer Maner",

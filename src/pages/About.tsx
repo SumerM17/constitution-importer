@@ -117,24 +117,29 @@ const About = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 {
-                  name: "Dr. Rajesh Sharma",
+                  name: "Sumit Magdum",
                   role: "Constitutional Expert",
                   image: "https://randomuser.me/api/portraits/men/32.jpg"
                 },
                 {
-                  name: "Dr. Priya Mehta",
-                  role: "Education Specialist",
+                  name: "Pratik Khamkar",
+                  role: "Data Collection",
                   image: "https://randomuser.me/api/portraits/women/44.jpg"
                 },
                 {
-                  name: "Amit Singh",
+                  name: "Nandini Vernekar",
                   role: "Lead Developer",
                   image: "https://randomuser.me/api/portraits/men/66.jpg"
                 },
                 {
-                  name: "Leela Desai",
+                  name: "Mrunmayee Torve",
                   role: "UX Designer",
                   image: "https://randomuser.me/api/portraits/women/79.jpg"
+                },
+                {
+                  name: "Sumer Maner",
+                  role: "Development",
+                  image: "https://randomuser.me/api/portraits/women/44.jpg"
                 }
               ].map((member, index) => (
                 <motion.div

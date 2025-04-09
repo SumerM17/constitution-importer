@@ -124,12 +124,12 @@ const About = () => {
                 {
                   name: "Pratik Khamkar",
                   role: "Data Collection",
-                  image: "https://randomuser.me/api/portraits/women/44.jpg"
+                  image: "https://randomuser.me/api/portraits/men/44.jpg"
                 },
                 {
                   name: "Nandini Vernekar",
                   role: "Lead Developer",
-                  image: "https://randomuser.me/api/portraits/men/66.jpg"
+                  image: "https://randomuser.me/api/portraits/women/66.jpg"
                 },
                 {
                   name: "Mrunmayee Torve",
@@ -139,7 +139,7 @@ const About = () => {
                 {
                   name: "Sumer Maner",
                   role: "Development",
-                  image: "https://randomuser.me/api/portraits/women/44.jpg"
+                  image: "https://randomuser.me/api/portraits/men/44.jpg"
                 }
               ].map((member, index) => (
                 <motion.div

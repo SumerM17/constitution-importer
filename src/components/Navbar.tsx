@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Search, BookOpen, Moon, Sun } from "lucide-react";
+import { Menu, X, Search, BookOpen, Moon, Sun, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -42,6 +42,16 @@ const Navbar = () => {
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  const handleDownloadConstitution = () => {
+    // Create a link to download the PDF
+    const link = document.createElement('a');
+    link.href = '/constitution_of_india.pdf'; // Path to your PDF in the public folder
+    link.download = 'Constitution_of_India.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -103,6 +113,9 @@ const Navbar = () => {
               <Button variant="ghost" size="icon" onClick={toggleTheme} className="ml-2">
                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
+              <Button variant="ghost" size="icon" onClick={handleDownloadConstitution} className="ml-2" title="Download Constitution">
+                <Download className="h-5 w-5" />
+              </Button>
             </div>
           </nav>
 
@@ -113,6 +126,9 @@ const Navbar = () => {
             </Button>
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={handleDownloadConstitution} title="Download Constitution">
+              <Download className="h-5 w-5" />
             </Button>
             <Button
               variant="ghost"
@@ -171,6 +187,16 @@ const Navbar = () => {
           >
             About
           </Link>
+          <button
+            className="flex items-center space-x-2 text-lg font-medium hover:text-accent transition-colors"
+            onClick={() => {
+              handleDownloadConstitution();
+              setIsMobileMenuOpen(false);
+            }}
+          >
+            <Download className="h-5 w-5" />
+            <span>Download Constitution</span>
+          </button>
         </div>
       </div>
     </header>

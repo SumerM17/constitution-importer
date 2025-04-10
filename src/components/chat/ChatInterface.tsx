@@ -1,14 +1,15 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { ChatMessage, ChatState } from "@/types/chat-types";
-import { generateUniqueId, generateBotResponse } from "@/utils/chatUtils";
+import { generateUniqueId } from "@/utils/chatUtils";
+import { getAIResponse, hasPerplexityApiKey } from "@/utils/perplexityUtils";
 import { Send, Bot, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import LawSuggestion from "./LawSuggestion";
+import ApiKeyForm from "./ApiKeyForm";
 import { motion } from "framer-motion";
 
 const ChatInterface = () => {
@@ -25,6 +26,7 @@ const ChatInterface = () => {
   });
   
   const [inputValue, setInputValue] = useState("");
+  const [hasApiKey, setHasApiKey] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,6 +39,11 @@ const ChatInterface = () => {
     "What are my rights in a domestic violence situation?",
     "What compensation can I claim for a workplace injury?"
   ];
+  
+  // Check if API key exists on mount
+  useEffect(() => {
+    setHasApiKey(hasPerplexityApiKey());
+  }, []);
   
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -73,9 +80,9 @@ const ChatInterface = () => {
     
     setInputValue("");
     
-    // Simulate API call delay
-    setTimeout(() => {
-      const { message, laws } = generateBotResponse(userMessage.content);
+    try {
+      // Get response from Perplexity API if key exists or fall back to local logic
+      const { message, laws } = await getAIResponse(userMessage.content);
       
       const botMessage: ChatMessage = {
         id: generateUniqueId(),
@@ -90,9 +97,8 @@ const ChatInterface = () => {
         isLoading: false
       }));
       
-      // If we found laws, add them as a special message
+      // Store laws for display in suggestions
       if (laws.length > 0) {
-        // Store laws in sessionStorage for display in suggestions
         sessionStorage.setItem("suggestedLaws", JSON.stringify(laws));
       } else {
         // If no laws found, provide helpful feedback after a moment
@@ -112,7 +118,22 @@ const ChatInterface = () => {
           }, 1500);
         }
       }
-    }, 1000);
+    } catch (error) {
+      console.error("Error getting response:", error);
+      
+      const errorMessage: ChatMessage = {
+        id: generateUniqueId(),
+        content: "I'm having trouble processing your request. Please try again later.",
+        sender: "bot",
+        timestamp: new Date()
+      };
+      
+      setChatState(prev => ({
+        ...prev,
+        messages: [...prev.messages, errorMessage],
+        isLoading: false
+      }));
+    }
   };
   
   const handlePromptClick = (prompt: string) => {
@@ -120,11 +141,23 @@ const ChatInterface = () => {
     inputRef.current?.focus();
   };
   
+  const handleApiKeySet = () => {
+    setHasApiKey(true);
+    toast({
+      title: "AI Integration Active",
+      description: "Your chatbot is now powered by Perplexity AI"
+    });
+  };
+  
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] max-w-4xl mx-auto border rounded-lg overflow-hidden bg-background">
       <div className="bg-legal-black text-legal-white p-4 flex items-center gap-2 border-b">
         <Bot className="h-5 w-5" />
         <h3 className="font-semibold">Legal Assistant</h3>
+      </div>
+      
+      <div className="p-4 border-b">
+        <ApiKeyForm onKeySet={handleApiKeySet} />
       </div>
       
       <ScrollArea className="flex-grow p-4">

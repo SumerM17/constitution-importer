@@ -7,10 +7,19 @@ import {
   getRasaServerUrl, 
   setRasaServerUrl, 
   hasRasaServerUrl,
-  testRasaConnection
+  testRasaConnection,
+  getRasaTroubleshooting
 } from "@/utils/rasaUtils";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, ExternalLink, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 interface RasaConfigFormProps {
   onServerSet: () => void;
@@ -21,6 +30,9 @@ const RasaConfigForm = ({ onServerSet }: RasaConfigFormProps) => {
   const [isConfigured, setIsConfigured] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"untested" | "success" | "failed">("untested");
+  const [errorType, setErrorType] = useState<string | undefined>();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [troubleshootingTips, setTroubleshootingTips] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,24 +51,35 @@ const RasaConfigForm = ({ onServerSet }: RasaConfigFormProps) => {
     setConnectionStatus("untested");
     
     try {
-      const isConnected = await testRasaConnection();
+      const result = await testRasaConnection();
       
-      if (isConnected) {
+      if (result.success) {
         setConnectionStatus("success");
+        setErrorType(undefined);
+        setErrorMessage(undefined);
+        
         toast({
           title: "Connection Successful",
           description: "Successfully connected to Rasa server"
         });
       } else {
         setConnectionStatus("failed");
+        setErrorType(result.errorType);
+        setErrorMessage(result.errorMessage);
+        setTroubleshootingTips(getRasaTroubleshooting(result.errorType));
+        
         toast({
           variant: "destructive",
           title: "Connection Failed",
-          description: "Could not connect to Rasa server. Check if it's running."
+          description: result.errorMessage || "Could not connect to Rasa server"
         });
       }
     } catch (error) {
       setConnectionStatus("failed");
+      setErrorType("unknown");
+      setErrorMessage("Unexpected error testing connection");
+      setTroubleshootingTips(getRasaTroubleshooting());
+      
       toast({
         variant: "destructive",
         title: "Connection Error",
@@ -89,7 +112,7 @@ const RasaConfigForm = ({ onServerSet }: RasaConfigFormProps) => {
       await testConnection();
       
       // Only trigger the callback if connection is successful
-      if (connectionStatus !== "failed") {
+      if (connectionStatus === "success") {
         onServerSet();
       }
     } catch (error) {
@@ -128,7 +151,7 @@ const RasaConfigForm = ({ onServerSet }: RasaConfigFormProps) => {
               ? connectionStatus === "success"
                 ? "Your chatbot is connected to a Rasa AI backend"
                 : connectionStatus === "failed"
-                ? "Cannot connect to Rasa server. Check if it's running."
+                ? errorMessage || "Cannot connect to Rasa server. Check if it's running."
                 : "Enter your Rasa server URL to enable advanced AI capabilities"
               : "Enter your Rasa server URL to enable advanced AI capabilities"}
           </p>
@@ -164,7 +187,8 @@ const RasaConfigForm = ({ onServerSet }: RasaConfigFormProps) => {
                 onClick={testConnection}
                 disabled={isTesting}
               >
-                Test
+                <RefreshCw className={`h-3.5 w-3.5 ${isTesting ? 'animate-spin' : ''}`} />
+                <span className="sr-only">Test</span>
               </Button>
             )}
           </form>
@@ -172,12 +196,52 @@ const RasaConfigForm = ({ onServerSet }: RasaConfigFormProps) => {
           {connectionStatus === "failed" && (
             <Alert variant="destructive" className="mt-3 py-2">
               <AlertDescription className="text-xs">
-                Could not connect to the Rasa server. Please check:
-                <ul className="list-disc pl-5 mt-1">
-                  <li>Rasa server is running</li>
-                  <li>URL is correct (e.g., http://localhost:5005)</li>
-                  <li>No firewall or network issues are blocking the connection</li>
-                </ul>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-medium mb-1">{errorType === 'timeout' ? 'Connection Timeout' : errorType === 'network' ? 'Network Error' : errorType === 'cors' ? 'CORS Error' : 'Connection Error'}</p>
+                    <p className="mb-2">{errorMessage}</p>
+                    
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="outline" size="sm" className="mt-1">
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          Troubleshooting Guide
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent>
+                        <SheetHeader>
+                          <SheetTitle>Rasa Connection Troubleshooting</SheetTitle>
+                          <SheetDescription>
+                            Follow these steps to fix your Rasa server connection
+                          </SheetDescription>
+                        </SheetHeader>
+                        <div className="mt-4">
+                          <h4 className="text-sm font-medium mb-2">Possible Solutions:</h4>
+                          <ul className="space-y-3">
+                            {troubleshootingTips.map((tip, index) => (
+                              <li key={index} className="flex gap-2">
+                                <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <span className="text-xs">{index + 1}</span>
+                                </div>
+                                <p className="text-sm">{tip}</p>
+                              </li>
+                            ))}
+                          </ul>
+                          
+                          <div className="border-t mt-4 pt-4">
+                            <h4 className="text-sm font-medium mb-2">Common Rasa Server Launch Command:</h4>
+                            <div className="bg-muted p-2 rounded text-xs font-mono overflow-auto">
+                              rasa run --enable-api --cors "*" --debug
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              This command enables the API and allows cross-origin requests, which is needed for web client connections.
+                            </p>
+                          </div>
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
+                </div>
               </AlertDescription>
             </Alert>
           )}

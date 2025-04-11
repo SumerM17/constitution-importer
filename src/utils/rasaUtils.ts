@@ -31,23 +31,106 @@ export const hasRasaServerUrl = (): boolean => {
   return !!url && url.startsWith('http');
 };
 
-// Test connection to Rasa server
-export const testRasaConnection = async (): Promise<boolean> => {
+// Test connection to Rasa server with detailed error information
+export const testRasaConnection = async (): Promise<{ success: boolean; errorType?: string; errorMessage?: string }> => {
   try {
+    // Create a timeout controller to prevent long waiting times
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
     // Send a simple request to check if server is reachable
     const response = await fetch(`${getRasaServerUrl()}/status`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Set a timeout to prevent long waiting times
-      signal: AbortSignal.timeout(5000),
+      signal: controller.signal,
     });
     
-    return response.ok;
-  } catch (error) {
+    // Clear the timeout since we got a response
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      return { 
+        success: false, 
+        errorType: 'server_error', 
+        errorMessage: `Server returned status ${response.status}: ${response.statusText}` 
+      };
+    }
+    
+    return { success: true };
+  } catch (error: any) {
     console.error("Failed to connect to Rasa server:", error);
-    return false;
+    
+    // Provide detailed error information based on error type
+    if (error.name === "AbortError") {
+      return { 
+        success: false, 
+        errorType: 'timeout', 
+        errorMessage: "Connection timed out. The server may be slow or unreachable." 
+      };
+    } else if (error.name === "TypeError" && error.message.includes("Failed to fetch")) {
+      return { 
+        success: false, 
+        errorType: 'network', 
+        errorMessage: "Network error. The server may be down or the URL may be incorrect." 
+      };
+    } else if (error.message?.includes("NetworkError")) {
+      return { 
+        success: false, 
+        errorType: 'cors', 
+        errorMessage: "CORS error. The Rasa server may not allow requests from this origin." 
+      };
+    }
+    
+    return { 
+      success: false, 
+      errorType: 'unknown', 
+      errorMessage: error.message || "Unknown error occurred" 
+    };
+  }
+};
+
+// Get specific troubleshooting instructions based on error type
+export const getRasaTroubleshooting = (errorType?: string): string[] => {
+  const commonInstructions = [
+    "Ensure the Rasa server is running on the specified URL.",
+    "Check if the URL is correct (e.g., http://localhost:5005).",
+    "Verify no firewall or network issues are blocking the connection."
+  ];
+  
+  switch (errorType) {
+    case 'timeout':
+      return [
+        "The connection to the Rasa server timed out.",
+        "Check if the server is overloaded or slow to respond.",
+        "Try increasing the timeout or restarting the server.",
+        ...commonInstructions
+      ];
+    case 'network':
+      return [
+        "Failed to establish a network connection to the Rasa server.",
+        "Verify the server is running and accessible from your network.",
+        "Double-check the URL is correct and includes http:// or https://.",
+        "Try using 'localhost' instead of an IP address, or vice versa.",
+        ...commonInstructions
+      ];
+    case 'cors':
+      return [
+        "CORS policy is preventing connection to the Rasa server.",
+        "Run Rasa with the '--cors \"*\"' flag to allow cross-origin requests.",
+        "Example: rasa run --cors \"*\" --enable-api",
+        ...commonInstructions
+      ];
+    case 'server_error':
+      return [
+        "The Rasa server returned an error status.",
+        "Check the server logs for more information.",
+        "Verify that the server endpoints are configured correctly.",
+        ...commonInstructions
+      ];
+    default:
+      return commonInstructions;
   }
 };
 
@@ -55,9 +138,9 @@ export const testRasaConnection = async (): Promise<boolean> => {
 const getFallbackResponse = (error: any): string => {
   if (error.name === "AbortError") {
     return "The Rasa server took too long to respond. Please check if it's running correctly.";
-  } else if (error.message.includes("NetworkError")) {
+  } else if (error.message?.includes("NetworkError")) {
     return "Unable to reach the Rasa server. Please verify the server URL and ensure it's running.";
-  } else if (error.message.includes("Failed to fetch")) {
+  } else if (error.message?.includes("Failed to fetch")) {
     return "Network error connecting to Rasa. Check your internet connection and server URL.";
   }
   return "I'm having trouble connecting to my AI backend. Please check the Rasa server connection.";

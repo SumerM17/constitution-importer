@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChatInterface from "@/components/chat/ChatInterface";
 import { motion } from "framer-motion";
-import { Bot, Sparkles } from "lucide-react";
+import { Bot, Sparkles, Cpu } from "lucide-react";
 
 const ChatBot = () => {
   // Hide the floating button when we're on the chat page
@@ -38,14 +38,28 @@ const ChatBot = () => {
               <h1 className="text-2xl md:text-4xl font-bold">Legal Assistant</h1>
               <Sparkles className="h-5 w-5 text-yellow-300" />
             </motion.div>
-            <motion.p 
-              className="max-w-2xl mx-auto text-sm md:text-base opacity-90"
+            <motion.div 
+              className="flex flex-col items-center justify-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              Ask questions about legal issues and get AI-powered guidance on relevant laws
-            </motion.p>
+              <p className="max-w-2xl mx-auto text-sm md:text-base opacity-90 mb-2">
+                Ask questions about legal issues and get AI-powered guidance on relevant laws
+              </p>
+              <div className="flex items-center gap-2 text-xs bg-gray-800 px-3 py-1 rounded-full">
+                <span>Powered by:</span>
+                <div className="flex items-center gap-1">
+                  <Bot className="h-3.5 w-3.5" />
+                  <span>Perplexity</span>
+                </div>
+                <span className="text-gray-500">|</span>
+                <div className="flex items-center gap-1">
+                  <Cpu className="h-3.5 w-3.5" />
+                  <span>Rasa</span>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </section>
         

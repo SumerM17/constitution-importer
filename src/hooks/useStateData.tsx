@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { INDIAN_STATES } from "@/lib/constants";
 
@@ -75,9 +76,15 @@ const fetchStateData = async (stateCode: string) => {
 };
 
 export const useStateData = (stateCode: string) => {
-  return useQuery({
+  const result = useQuery({
     queryKey: ["stateData", stateCode],
     queryFn: () => fetchStateData(stateCode),
     enabled: !!stateCode,
   });
+  
+  return {
+    stateData: result.data,
+    isLoading: result.isLoading,
+    error: result.error
+  };
 };

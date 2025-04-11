@@ -56,16 +56,30 @@ const fetchStateMinistersData = async (stateCode: string) => {
 };
 
 export const useCentralMinistersData = () => {
-  return useQuery({
+  const result = useQuery({
     queryKey: ["centralMinisters"],
     queryFn: fetchCentralMinisters,
   });
+  
+  return {
+    ministers: result.data?.ministers || [],
+    departments: result.data?.departments || [],
+    isLoading: result.isLoading,
+    error: result.error
+  };
 };
 
 export const useStateMinistersData = (stateCode: string) => {
-  return useQuery({
+  const result = useQuery({
     queryKey: ["stateMinisters", stateCode],
     queryFn: () => fetchStateMinistersData(stateCode),
     enabled: !!stateCode,
   });
+  
+  return {
+    ministers: result.data?.ministers || [],
+    departments: result.data?.departments || [],
+    isLoading: result.isLoading,
+    error: result.error
+  };
 };

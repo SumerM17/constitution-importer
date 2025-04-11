@@ -31,11 +31,48 @@ export const hasRasaServerUrl = (): boolean => {
   return !!url && url.startsWith('http');
 };
 
+// Test connection to Rasa server
+export const testRasaConnection = async (): Promise<boolean> => {
+  try {
+    // Send a simple request to check if server is reachable
+    const response = await fetch(`${getRasaServerUrl()}/status`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Set a timeout to prevent long waiting times
+      signal: AbortSignal.timeout(5000),
+    });
+    
+    return response.ok;
+  } catch (error) {
+    console.error("Failed to connect to Rasa server:", error);
+    return false;
+  }
+};
+
+// Provide a fallback response when Rasa is unavailable
+const getFallbackResponse = (error: any): string => {
+  if (error.name === "AbortError") {
+    return "The Rasa server took too long to respond. Please check if it's running correctly.";
+  } else if (error.message.includes("NetworkError")) {
+    return "Unable to reach the Rasa server. Please verify the server URL and ensure it's running.";
+  } else if (error.message.includes("Failed to fetch")) {
+    return "Network error connecting to Rasa. Check your internet connection and server URL.";
+  }
+  return "I'm having trouble connecting to my AI backend. Please check the Rasa server connection.";
+};
+
 // Send message to Rasa server and get response
 export const sendMessageToRasa = async (message: string, sender_id: string = "user"): Promise<string> => {
   try {
+    const controller = new AbortController();
+    // Set a timeout to prevent waiting too long for a response
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
     const response = await fetch(`${getRasaServerUrl()}/webhooks/rest/webhook`, {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -44,6 +81,8 @@ export const sendMessageToRasa = async (message: string, sender_id: string = "us
         message
       }),
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`Rasa server returned ${response.status}`);
@@ -58,9 +97,10 @@ export const sendMessageToRasa = async (message: string, sender_id: string = "us
       return messages.join('\n');
     }
     
+    // If no valid response from Rasa
     return "I'm sorry, I didn't understand that. Could you rephrase?";
   } catch (error) {
     console.error("Error communicating with Rasa:", error);
-    return "I'm having trouble connecting to my AI backend. Please check the Rasa server connection.";
+    return getFallbackResponse(error);
   }
 };

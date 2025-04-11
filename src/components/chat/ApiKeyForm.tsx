@@ -10,7 +10,7 @@ import {
   SheetTitle
 } from "@/components/ui/sheet";
 import { hasPerplexityApiKey, setPerplexityApiKey, clearPerplexityApiKey } from "@/utils/perplexityUtils";
-import { Key, CheckCircle, AlertCircle } from "lucide-react";
+import { Key, CheckCircle, AlertCircle, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ApiKeyFormProps {
@@ -64,7 +64,7 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ onKeySet }) => {
       {hasKey ? (
         <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-200 rounded-md">
           <CheckCircle className="h-4 w-4 text-green-500" />
-          <p className="text-sm flex-grow">Perplexity API key is set</p>
+          <p className="text-sm flex-grow">Perplexity API key is set - Enhanced AI responses enabled</p>
           <Button variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
             Change
           </Button>
@@ -74,8 +74,8 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ onKeySet }) => {
         </div>
       ) : (
         <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-200 rounded-md">
-          <AlertCircle className="h-4 w-4 text-amber-500" />
-          <p className="text-sm flex-grow">Set up Perplexity API key to use the AI chatbot</p>
+          <Info className="h-4 w-4 text-amber-500" />
+          <p className="text-sm flex-grow">The chatbot works without an API key, but for best results you can add your Perplexity API key</p>
           <Button onClick={() => setIsOpen(true)} className="flex items-center gap-1">
             <Key className="h-4 w-4" />
             <span>Set API Key</span>
@@ -88,7 +88,7 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ onKeySet }) => {
           <SheetHeader>
             <SheetTitle>Set Perplexity API Key</SheetTitle>
             <SheetDescription>
-              Enter your Perplexity API key to enable AI responses.
+              Enter your Perplexity API key to enable enhanced AI responses.
               You can get an API key from the{" "}
               <a
                 href="https://www.perplexity.ai/settings/api"

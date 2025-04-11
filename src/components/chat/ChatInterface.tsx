@@ -1,20 +1,14 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { ChatMessage, ChatState } from "@/types/chat-types";
-import { generateUniqueId } from "@/utils/chatUtils";
-import { getAIResponse, hasPerplexityApiKey } from "@/utils/perplexityUtils";
-import { sendMessageToRasa, hasRasaServerUrl } from "@/utils/rasaUtils";
-import { Send, Bot, User, Cpu } from "lucide-react";
+import { generateUniqueId, generateBotResponse } from "@/utils/chatUtils";
+import { Send, Bot, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LawSuggestion from "./LawSuggestion";
-import ApiKeyForm from "./ApiKeyForm";
-import RasaConfigForm from "./RasaConfigForm";
 import { motion } from "framer-motion";
-
-type AIBackendType = "perplexity" | "rasa";
 
 const ChatInterface = () => {
   const [chatState, setChatState] = useState<ChatState>({
@@ -30,13 +24,9 @@ const ChatInterface = () => {
   });
   
   const [inputValue, setInputValue] = useState("");
-  const [hasApiKey, setHasApiKey] = useState(false);
-  const [activeBackend, setActiveBackend] = useState<AIBackendType>("perplexity");
-  const [hasRasaServer, setHasRasaServer] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
-  const sessionId = useRef<string>(generateUniqueId());
   
   // Predefined prompts to help users get started
   const suggestedPrompts = [
@@ -46,12 +36,6 @@ const ChatInterface = () => {
     "What are my rights in a domestic violence situation?",
     "What compensation can I claim for a workplace injury?"
   ];
-  
-  // Check if API keys exist on mount
-  useEffect(() => {
-    setHasApiKey(hasPerplexityApiKey());
-    setHasRasaServer(hasRasaServerUrl());
-  }, []);
   
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -89,60 +73,36 @@ const ChatInterface = () => {
     setInputValue("");
     
     try {
-      let botResponse: string = "";
-      let laws: any[] = [];
-      
-      // Use appropriate AI backend based on user selection
-      if (activeBackend === "rasa" && hasRasaServer) {
-        // Get response from Rasa API
-        botResponse = await sendMessageToRasa(userMessage.content, sessionId.current);
-      } else {
-        // Get response from Perplexity API or fallback
-        const response = await getAIResponse(userMessage.content);
-        botResponse = response.message;
-        laws = response.laws;
-      }
+      // Get local bot response using our utility function
+      const response = generateBotResponse(userMessage.content);
       
       const botMessage: ChatMessage = {
         id: generateUniqueId(),
-        content: botResponse,
+        content: response.message,
         sender: "bot",
         timestamp: new Date()
       };
       
-      setChatState(prev => ({
-        ...prev,
-        messages: [...prev.messages, botMessage],
-        isLoading: false
-      }));
+      // Short delay to simulate processing
+      setTimeout(() => {
+        setChatState(prev => ({
+          ...prev,
+          messages: [...prev.messages, botMessage],
+          isLoading: false
+        }));
+        
+        // Store any relevant laws found
+        if (response.laws.length > 0) {
+          sessionStorage.setItem("suggestedLaws", JSON.stringify(response.laws));
+        }
+      }, 500);
       
-      // Only store laws for display if using Perplexity
-      if (activeBackend === "perplexity" && laws.length > 0) {
-        sessionStorage.setItem("suggestedLaws", JSON.stringify(laws));
-      }
-      
-      // If no laws found with Perplexity, provide helpful feedback after a moment
-      if (activeBackend === "perplexity" && laws.length === 0 && userMessage.content.length < 10) {
-        setTimeout(() => {
-          const helpfulTip: ChatMessage = {
-            id: generateUniqueId(),
-            content: "Try providing more details in your question to help me find relevant laws for your situation.",
-            sender: "bot",
-            timestamp: new Date()
-          };
-          
-          setChatState(prev => ({
-            ...prev,
-            messages: [...prev.messages, helpfulTip]
-          }));
-        }, 1500);
-      }
     } catch (error) {
       console.error("Error getting response:", error);
       
       const errorMessage: ChatMessage = {
         id: generateUniqueId(),
-        content: "I'm having trouble processing your request. Please check your connection to the AI backend.",
+        content: "I'm having trouble processing your request. Please try again later.",
         sender: "bot",
         timestamp: new Date()
       };
@@ -160,48 +120,11 @@ const ChatInterface = () => {
     inputRef.current?.focus();
   };
   
-  const handleApiKeySet = () => {
-    setHasApiKey(true);
-    toast({
-      title: "Perplexity AI Integration Active",
-      description: "Your chatbot is now powered by Perplexity AI"
-    });
-  };
-  
-  const handleRasaServerSet = () => {
-    setHasRasaServer(true);
-    toast({
-      title: "Rasa Integration Active",
-      description: "Your chatbot is now connected to Rasa"
-    });
-  };
-  
-  const handleBackendChange = (backend: string) => {
-    setActiveBackend(backend as AIBackendType);
-  };
-  
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] max-w-4xl mx-auto border rounded-lg overflow-hidden bg-background">
       <div className="bg-legal-black text-legal-white p-4 flex items-center gap-2 border-b">
         <Bot className="h-5 w-5" />
         <h3 className="font-semibold">Legal Assistant</h3>
-      </div>
-      
-      <div className="p-4 border-b">
-        <Tabs defaultValue="perplexity" onValueChange={handleBackendChange}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="perplexity">Perplexity AI</TabsTrigger>
-            <TabsTrigger value="rasa">Rasa AI</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="perplexity">
-            <ApiKeyForm onKeySet={handleApiKeySet} />
-          </TabsContent>
-          
-          <TabsContent value="rasa">
-            <RasaConfigForm onServerSet={handleRasaServerSet} />
-          </TabsContent>
-        </Tabs>
       </div>
       
       <ScrollArea className="flex-grow p-4">
@@ -231,8 +154,6 @@ const ChatInterface = () => {
                   {msg.sender === "user" ? (
                     <User className="h-4 w-4" />
                   ) : (
-                    activeBackend === "rasa" ? 
-                    <Cpu className="h-4 w-4" /> : 
                     <Bot className="h-4 w-4" />
                   )}
                 </div>
@@ -253,11 +174,7 @@ const ChatInterface = () => {
             <div className="flex justify-start">
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                  {activeBackend === "rasa" ? (
-                    <Cpu className="h-4 w-4" />
-                  ) : (
-                    <Bot className="h-4 w-4" />
-                  )}
+                  <Bot className="h-4 w-4" />
                 </div>
                 <div className="bg-muted rounded-lg p-4">
                   <div className="flex gap-1">
@@ -274,7 +191,7 @@ const ChatInterface = () => {
         </div>
       </ScrollArea>
       
-      {activeBackend === "perplexity" && <LawSuggestion />}
+      <LawSuggestion />
       
       {/* Suggested prompts */}
       {chatState.messages.length < 3 && (
@@ -298,7 +215,7 @@ const ChatInterface = () => {
         <div className="flex gap-2">
           <Input
             ref={inputRef}
-            placeholder={`Ask about your legal question... (using ${activeBackend === "rasa" ? "Rasa" : "Perplexity"} AI)`}
+            placeholder="Ask about your legal question..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             disabled={chatState.isLoading}
@@ -307,9 +224,7 @@ const ChatInterface = () => {
           <Button 
             type="submit" 
             size="icon" 
-            disabled={chatState.isLoading || !inputValue.trim() || 
-              (activeBackend === "rasa" && !hasRasaServer) || 
-              (activeBackend === "perplexity" && !hasPerplexityApiKey() && inputValue.length > 50)}
+            disabled={chatState.isLoading || !inputValue.trim()}
           >
             <Send className="h-4 w-4" />
           </Button>

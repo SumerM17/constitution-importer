@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChatInterface from "@/components/chat/ChatInterface";
 import { motion } from "framer-motion";
-import { Bot, Sparkles, Cpu } from "lucide-react";
+import { Bot, Sparkles } from "lucide-react";
 
 const ChatBot = () => {
   // Hide the floating button when we're on the chat page
@@ -47,18 +47,6 @@ const ChatBot = () => {
               <p className="max-w-2xl mx-auto text-sm md:text-base opacity-90 mb-2">
                 Ask questions about legal issues and get AI-powered guidance on relevant laws
               </p>
-              <div className="flex items-center gap-2 text-xs bg-gray-800 px-3 py-1 rounded-full">
-                <span>Powered by:</span>
-                <div className="flex items-center gap-1">
-                  <Bot className="h-3.5 w-3.5" />
-                  <span>Perplexity</span>
-                </div>
-                <span className="text-gray-500">|</span>
-                <div className="flex items-center gap-1">
-                  <Cpu className="h-3.5 w-3.5" />
-                  <span>Rasa</span>
-                </div>
-              </div>
             </motion.div>
           </div>
         </section>

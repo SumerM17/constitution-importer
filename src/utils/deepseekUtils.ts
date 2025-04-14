@@ -57,7 +57,8 @@ export const testDeepseekConnection = async (): Promise<boolean> => {
 // Get response from DeepSeek API
 export const getDeepseekResponse = async (messages: { role: string; content: string }[]): Promise<string> => {
   try {
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    // Updated to use the official DeepSeek API endpoint
+    const response = await fetch("https://api.deepinfra.com/v1/openai/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

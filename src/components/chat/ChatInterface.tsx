@@ -2,19 +2,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChatMessage, ChatState } from "@/types/chat-types";
 import { generateUniqueId, generateBotResponse } from "@/utils/chatUtils";
-import { Send, Bot, User, Settings } from "lucide-react";
+import { Send, Bot, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import LawSuggestion from "./LawSuggestion";
 import { motion } from "framer-motion";
-import { 
-  getDeepseekApiKey, 
-  isDeepseekConfigured, 
-  getDeepseekResponse 
-} from "@/utils/deepseekUtils";
-import DeepseekConfigForm from "./DeepseekConfigForm";
+import { getDeepseekResponse } from "@/utils/deepseekUtils";
 
 const ChatInterface = () => {
   const [chatState, setChatState] = useState<ChatState>({
@@ -30,7 +25,6 @@ const ChatInterface = () => {
   });
   
   const [inputValue, setInputValue] = useState("");
-  const [showConfig, setShowConfig] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -80,41 +74,30 @@ const ChatInterface = () => {
     setInputValue("");
     
     try {
-      let botResponse: string;
-      let relevantLaws: any[] = [];
+      // Format messages for DeepSeek API
+      const messageHistory = chatState.messages.map(msg => ({
+        role: msg.sender === "user" ? "user" : "assistant",
+        content: msg.content
+      }));
       
-      // Check if DeepSeek is configured
-      if (isDeepseekConfigured()) {
-        // Format messages for DeepSeek API
-        const messageHistory = chatState.messages.map(msg => ({
-          role: msg.sender === "user" ? "user" : "assistant",
-          content: msg.content
-        }));
-        
-        // Add current message
-        messageHistory.push({
-          role: "user",
-          content: userMessage.content
-        });
-        
-        // Add system message for context
-        messageHistory.unshift({
-          role: "system",
-          content: "You are a legal assistant AI specializing in legal information and guidance. Provide helpful, accurate information about laws, legal procedures, and rights. Do not provide specific legal advice that would require a licensed attorney."
-        });
-        
-        // Get response from DeepSeek
-        botResponse = await getDeepseekResponse(messageHistory);
-        
-        // Still check for relevant laws using our local function
-        const localResponse = generateBotResponse(userMessage.content);
-        relevantLaws = localResponse.laws;
-      } else {
-        // Use local response generation
-        const localResponse = generateBotResponse(userMessage.content);
-        botResponse = localResponse.message;
-        relevantLaws = localResponse.laws;
-      }
+      // Add current message
+      messageHistory.push({
+        role: "user",
+        content: userMessage.content
+      });
+      
+      // Add system message for context
+      messageHistory.unshift({
+        role: "system",
+        content: "You are a legal assistant AI specializing in legal information and guidance. Provide helpful, accurate information about laws, legal procedures, and rights. Do not provide specific legal advice that would require a licensed attorney."
+      });
+      
+      // Get response from DeepSeek
+      const botResponse = await getDeepseekResponse(messageHistory);
+      
+      // Check for relevant laws using our local function
+      const localResponse = generateBotResponse(userMessage.content);
+      const relevantLaws = localResponse.laws;
       
       const botMessage: ChatMessage = {
         id: generateUniqueId(),
@@ -160,10 +143,6 @@ const ChatInterface = () => {
     inputRef.current?.focus();
   };
   
-  const toggleConfig = () => {
-    setShowConfig(!showConfig);
-  };
-  
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] max-w-4xl mx-auto border rounded-lg overflow-hidden bg-background">
       <div className="bg-legal-black text-legal-white p-4 flex items-center justify-between border-b">
@@ -171,17 +150,7 @@ const ChatInterface = () => {
           <Bot className="h-5 w-5" />
           <h3 className="font-semibold">Legal Assistant</h3>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-legal-white hover:bg-legal-black/50"
-          onClick={toggleConfig}
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
       </div>
-      
-      {showConfig && <DeepseekConfigForm />}
       
       <ScrollArea className="flex-grow p-4">
         <div className="space-y-4">

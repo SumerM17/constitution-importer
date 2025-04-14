@@ -1,40 +1,38 @@
 
 import { toast } from "@/hooks/use-toast";
 
-// Store API key in sessionStorage for temporary persistence
-const DEEPSEEK_API_KEY_STORAGE = "deepseek_api_key";
+// Using a hard-coded API key for DeepSeek
+const DEEPSEEK_API_KEY = "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";
 
-// Get the stored API key
-export const getDeepseekApiKey = (): string | null => {
-  return sessionStorage.getItem(DEEPSEEK_API_KEY_STORAGE);
+// Get the API key (now returns the hardcoded key)
+export const getDeepseekApiKey = (): string => {
+  return DEEPSEEK_API_KEY;
 };
 
-// Set the API key
+// These functions are maintained for backward compatibility but now just return true
 export const setDeepseekApiKey = (apiKey: string): void => {
-  sessionStorage.setItem(DEEPSEEK_API_KEY_STORAGE, apiKey);
+  // No-op as we're using a hardcoded key
+  return;
 };
 
-// Clear the API key
 export const clearDeepseekApiKey = (): void => {
-  sessionStorage.removeItem(DEEPSEEK_API_KEY_STORAGE);
+  // No-op as we're using a hardcoded key
+  return;
 };
 
-// Check if API key is configured
+// Check if API key is configured (always true now)
 export const isDeepseekConfigured = (): boolean => {
-  return !!getDeepseekApiKey();
+  return true;
 };
 
 // Test DeepSeek connection with a simple query
 export const testDeepseekConnection = async (): Promise<boolean> => {
-  const apiKey = getDeepseekApiKey();
-  if (!apiKey) return false;
-  
   try {
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify({
         model: "deepseek-chat",
@@ -58,17 +56,12 @@ export const testDeepseekConnection = async (): Promise<boolean> => {
 
 // Get response from DeepSeek API
 export const getDeepseekResponse = async (messages: { role: string; content: string }[]): Promise<string> => {
-  const apiKey = getDeepseekApiKey();
-  if (!apiKey) {
-    throw new Error("DeepSeek API key is not configured");
-  }
-  
   try {
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify({
         model: "deepseek-chat",

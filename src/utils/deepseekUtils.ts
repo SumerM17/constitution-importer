@@ -58,6 +58,13 @@ export const testDeepseekConnection = async (): Promise<boolean> => {
 // Get response from DeepSeek API
 export const getDeepseekResponse = async (messages: { role: string; content: string }[]): Promise<string> => {
   try {
+    // Log the request being sent to help with debugging
+    console.log("Sending request to DeepSeek API:", { 
+      model: "deepseek-coder",
+      messages: messages.slice(0, 2).concat([{...messages[messages.length - 1], content: "..."}]), // Log first messages and truncate content for readability
+      temperature: 0.7
+    });
+    
     const response = await fetch("https://api.deepinfra.com/v1/openai/chat/completions", {
       method: "POST",
       headers: {
@@ -65,7 +72,7 @@ export const getDeepseekResponse = async (messages: { role: string; content: str
         "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify({
-        model: "deepseek-coder",
+        model: "deepseek-coder", // Using the correct model name
         messages: messages,
         temperature: 0.7,
         max_tokens: 500
@@ -75,10 +82,18 @@ export const getDeepseekResponse = async (messages: { role: string; content: str
     if (!response.ok) {
       const error = await response.json();
       console.error("DeepSeek API error:", error);
-      throw new Error(error.detail || error.error?.message || "Failed to get response from DeepSeek API");
+      // Provide more detailed error message
+      const errorMsg = error.detail || error.error?.message || "Failed to get response from DeepSeek API";
+      toast({
+        title: "API Error",
+        description: errorMsg,
+        variant: "destructive"
+      });
+      throw new Error(errorMsg);
     }
     
     const data = await response.json();
+    console.log("Received response from DeepSeek:", data); // Log the successful response
     return data.choices[0].message.content;
   } catch (error: any) {
     console.error("Error getting DeepSeek response:", error);

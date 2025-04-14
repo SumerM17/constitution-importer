@@ -28,14 +28,14 @@ export const isDeepseekConfigured = (): boolean => {
 // Test DeepSeek connection with a simple query
 export const testDeepseekConnection = async (): Promise<boolean> => {
   try {
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    const response = await fetch("https://api.deepinfra.com/v1/openai/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "deepseek-coder",
         messages: [{ role: "user", content: "Hello" }],
         temperature: 0.7,
         max_tokens: 50
@@ -44,7 +44,8 @@ export const testDeepseekConnection = async (): Promise<boolean> => {
     
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error?.message || "Unknown API error");
+      console.error("DeepSeek API error:", error);
+      throw new Error(error.detail || error.error?.message || "Unknown API error");
     }
     
     return true;
@@ -57,7 +58,6 @@ export const testDeepseekConnection = async (): Promise<boolean> => {
 // Get response from DeepSeek API
 export const getDeepseekResponse = async (messages: { role: string; content: string }[]): Promise<string> => {
   try {
-    // Updated to use the official DeepSeek API endpoint
     const response = await fetch("https://api.deepinfra.com/v1/openai/chat/completions", {
       method: "POST",
       headers: {
@@ -65,7 +65,7 @@ export const getDeepseekResponse = async (messages: { role: string; content: str
         "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "deepseek-coder",
         messages: messages,
         temperature: 0.7,
         max_tokens: 500
@@ -74,7 +74,8 @@ export const getDeepseekResponse = async (messages: { role: string; content: str
     
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error?.message || "Failed to get response from DeepSeek API");
+      console.error("DeepSeek API error:", error);
+      throw new Error(error.detail || error.error?.message || "Failed to get response from DeepSeek API");
     }
     
     const data = await response.json();

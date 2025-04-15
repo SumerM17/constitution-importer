@@ -8,11 +8,16 @@ import {
   getDeepseekApiKey, 
   setDeepseekApiKey,
   clearDeepseekApiKey,
-  testDeepseekConnection
+  testDeepseekConnection,
+  isDeepseekConfigured
 } from "@/utils/deepseekUtils";
-import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle, Loader2, ExternalLink } from "lucide-react";
 
-const DeepseekConfigForm: React.FC = () => {
+interface DeepseekConfigFormProps {
+  onUpdate?: () => void;
+}
+
+const DeepseekConfigForm: React.FC<DeepseekConfigFormProps> = ({ onUpdate }) => {
   const [apiKey, setApiKey] = useState("");
   const [isConfigured, setIsConfigured] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
@@ -22,8 +27,9 @@ const DeepseekConfigForm: React.FC = () => {
   useEffect(() => {
     const storedKey = getDeepseekApiKey();
     if (storedKey) {
+      // Mask the key for display
       setApiKey(storedKey);
-      setIsConfigured(true);
+      setIsConfigured(isDeepseekConfigured());
     }
   }, []);
 
@@ -47,6 +53,11 @@ const DeepseekConfigForm: React.FC = () => {
     
     // Test the connection after saving
     await testConnection();
+    
+    // Notify parent component of the update
+    if (onUpdate) {
+      onUpdate();
+    }
   };
 
   const handleClear = () => {
@@ -59,6 +70,11 @@ const DeepseekConfigForm: React.FC = () => {
       title: "API Key Removed",
       description: "DeepSeek API key has been removed",
     });
+    
+    // Notify parent component of the update
+    if (onUpdate) {
+      onUpdate();
+    }
   };
 
   const testConnection = async () => {
@@ -160,9 +176,15 @@ const DeepseekConfigForm: React.FC = () => {
       </div>
       
       {!isConfigured && (
-        <div className="text-sm text-muted-foreground mt-2">
-          <p>You need a DeepSeek API key to use this integration.</p>
-          <p>Once configured, the chat will use DeepSeek's AI to generate responses.</p>
+        <div className="text-sm text-muted-foreground mt-4">
+          <h4 className="font-medium mb-2">How to get a DeepSeek API key:</h4>
+          <ol className="list-decimal list-inside space-y-1 pl-2">
+            <li>Create an account at <a href="https://deepseek.ai" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center">deepseek.ai <ExternalLink className="ml-1 h-3 w-3" /></a></li>
+            <li>Navigate to your account settings or API section</li>
+            <li>Create a new API key for your project</li>
+            <li>Copy and paste your API key above</li>
+          </ol>
+          <p className="mt-2">Once configured, the chat will use DeepSeek's AI to generate responses.</p>
         </div>
       )}
       

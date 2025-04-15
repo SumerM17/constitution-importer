@@ -1,15 +1,22 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { ChatMessage, ChatState } from "@/types/chat-types";
 import { generateUniqueId, generateBotResponse } from "@/utils/chatUtils";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import LawSuggestion from "./LawSuggestion";
 import { motion } from "framer-motion";
-import { getDeepseekResponse } from "@/utils/deepseekUtils";
+import { getDeepseekResponse, isDeepseekConfigured } from "@/utils/deepseekUtils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import DeepseekConfigForm from "./DeepseekConfigForm";
 
 const ChatInterface = () => {
   const [chatState, setChatState] = useState<ChatState>({
@@ -28,8 +35,19 @@ const ChatInterface = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isConfigured, setIsConfigured] = useState(isDeepseekConfigured());
   
-  // Predefined prompts to help users get started
+  useEffect(() => {
+    setIsConfigured(isDeepseekConfigured());
+    
+    if (!isDeepseekConfigured()) {
+      toast({
+        title: "API Key Required",
+        description: "Please configure your DeepSeek API key to use the AI assistant",
+      });
+    }
+  }, [toast]);
+  
   const suggestedPrompts = [
     "What are the penalties for traffic signal violations?",
     "What should I do after a road accident?",
@@ -38,14 +56,12 @@ const ChatInterface = () => {
     "What compensation can I claim for a workplace injury?"
   ];
   
-  // Scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatState.messages]);
   
-  // Focus the input field when the component mounts
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -57,7 +73,6 @@ const ChatInterface = () => {
     
     if (!inputValue.trim()) return;
     
-    // Add user message
     const userMessage: ChatMessage = {
       id: generateUniqueId(),
       content: inputValue,
@@ -74,28 +89,30 @@ const ChatInterface = () => {
     setInputValue("");
     
     try {
-      // Format messages for DeepSeek API
-      const messageHistory = chatState.messages.map(msg => ({
-        role: msg.sender === "user" ? "user" : "assistant",
-        content: msg.content
-      }));
+      let botResponse = "";
       
-      // Add current message
-      messageHistory.push({
-        role: "user",
-        content: userMessage.content
-      });
+      if (isDeepseekConfigured()) {
+        const messageHistory = chatState.messages.map(msg => ({
+          role: msg.sender === "user" ? "user" : "assistant",
+          content: msg.content
+        }));
+        
+        messageHistory.push({
+          role: "user",
+          content: userMessage.content
+        });
+        
+        messageHistory.unshift({
+          role: "system",
+          content: "You are a legal assistant AI specializing in legal information and guidance. Provide helpful, accurate information about laws, legal procedures, and rights. Do not provide specific legal advice that would require a licensed attorney."
+        });
+        
+        botResponse = await getDeepseekResponse(messageHistory);
+      } else {
+        const localResponse = generateBotResponse(userMessage.content);
+        botResponse = "To use AI features, please configure your DeepSeek API key. For now, here's some basic information: " + localResponse.message;
+      }
       
-      // Add system message for context
-      messageHistory.unshift({
-        role: "system",
-        content: "You are a legal assistant AI specializing in legal information and guidance. Provide helpful, accurate information about laws, legal procedures, and rights. Do not provide specific legal advice that would require a licensed attorney."
-      });
-      
-      // Get response from DeepSeek
-      const botResponse = await getDeepseekResponse(messageHistory);
-      
-      // Check for relevant laws using our local function
       const localResponse = generateBotResponse(userMessage.content);
       const relevantLaws = localResponse.laws;
       
@@ -106,7 +123,6 @@ const ChatInterface = () => {
         timestamp: new Date()
       };
       
-      // Short delay to simulate processing
       setTimeout(() => {
         setChatState(prev => ({
           ...prev,
@@ -114,7 +130,6 @@ const ChatInterface = () => {
           isLoading: false
         }));
         
-        // Store any relevant laws found
         if (relevantLaws.length > 0) {
           sessionStorage.setItem("suggestedLaws", JSON.stringify(relevantLaws));
         }
@@ -143,6 +158,17 @@ const ChatInterface = () => {
     inputRef.current?.focus();
   };
   
+  const handleApiKeyUpdate = () => {
+    setIsConfigured(isDeepseekConfigured());
+    
+    if (isDeepseekConfigured()) {
+      toast({
+        title: "API Key Configured",
+        description: "DeepSeek API key has been successfully configured."
+      });
+    }
+  };
+  
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] max-w-4xl mx-auto border rounded-lg overflow-hidden bg-background">
       <div className="bg-legal-black text-legal-white p-4 flex items-center justify-between border-b">
@@ -150,7 +176,34 @@ const ChatInterface = () => {
           <Bot className="h-5 w-5" />
           <h3 className="font-semibold">Legal Assistant</h3>
         </div>
+        
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-white hover:bg-legal-black/90">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>AI Assistant Settings</DialogTitle>
+            </DialogHeader>
+            <DeepseekConfigForm onUpdate={handleApiKeyUpdate} />
+          </DialogContent>
+        </Dialog>
       </div>
+      
+      {!isConfigured && (
+        <div className="bg-yellow-50 border-b border-yellow-200 p-3">
+          <p className="text-sm text-yellow-800 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span>DeepSeek API key not configured. Click the settings icon to add your API key.</span>
+          </p>
+        </div>
+      )}
       
       <ScrollArea className="flex-grow p-4">
         <div className="space-y-4">
@@ -218,7 +271,6 @@ const ChatInterface = () => {
       
       <LawSuggestion />
       
-      {/* Suggested prompts */}
       {chatState.messages.length < 3 && (
         <div className="p-3 border-t">
           <p className="text-xs text-muted-foreground mb-2">Try asking about:</p>

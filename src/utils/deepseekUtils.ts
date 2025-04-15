@@ -2,6 +2,7 @@
 import { toast } from "@/hooks/use-toast";
 
 // Using a hard-coded API key for DeepSeek
+// Updated to a new API key that has proper authorization
 const DEEPSEEK_API_KEY = "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";
 
 // Get the API key (now returns the hardcoded key)
@@ -28,6 +29,8 @@ export const isDeepseekConfigured = (): boolean => {
 // Test DeepSeek connection with a simple query
 export const testDeepseekConnection = async (): Promise<boolean> => {
   try {
+    console.log("Testing DeepSeek connection with API key:", DEEPSEEK_API_KEY.slice(0, 10) + "...");
+    
     const response = await fetch("https://api.deepinfra.com/v1/openai/chat/completions", {
       method: "POST",
       headers: {
@@ -45,9 +48,13 @@ export const testDeepseekConnection = async (): Promise<boolean> => {
     if (!response.ok) {
       const error = await response.json();
       console.error("DeepSeek API error:", error);
-      throw new Error(error.detail || error.error?.message || "Unknown API error");
+      const errorMessage = error.detail || error.error?.message || "Unknown API error";
+      console.error("Error message:", errorMessage);
+      throw new Error(errorMessage);
     }
     
+    const data = await response.json();
+    console.log("Test connection successful:", data);
     return true;
   } catch (error) {
     console.error("DeepSeek connection test failed:", error);
@@ -58,6 +65,11 @@ export const testDeepseekConnection = async (): Promise<boolean> => {
 // Get response from DeepSeek API
 export const getDeepseekResponse = async (messages: { role: string; content: string }[]): Promise<string> => {
   try {
+    // Check if we have valid messages to send
+    if (!messages || messages.length === 0) {
+      throw new Error("No messages provided for DeepSeek API");
+    }
+    
     // Log the request being sent to help with debugging
     console.log("Sending request to DeepSeek API:", { 
       model: "deepseek-coder",
@@ -79,11 +91,21 @@ export const getDeepseekResponse = async (messages: { role: string; content: str
       })
     });
     
+    // Log the raw response for debugging
+    console.log("DeepSeek API response status:", response.status);
+    
     if (!response.ok) {
-      const error = await response.json();
+      const errorText = await response.text();
+      let error;
+      try {
+        error = JSON.parse(errorText);
+      } catch (e) {
+        error = { detail: errorText };
+      }
+      
       console.error("DeepSeek API error:", error);
       // Provide more detailed error message
-      const errorMsg = error.detail || error.error?.message || "Failed to get response from DeepSeek API";
+      const errorMsg = error.detail || error.error?.message || `HTTP Error ${response.status}: Failed to get response from DeepSeek API`;
       toast({
         title: "API Error",
         description: errorMsg,
@@ -94,6 +116,11 @@ export const getDeepseekResponse = async (messages: { role: string; content: str
     
     const data = await response.json();
     console.log("Received response from DeepSeek:", data); // Log the successful response
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error("Invalid response format from DeepSeek API");
+    }
+    
     return data.choices[0].message.content;
   } catch (error: any) {
     console.error("Error getting DeepSeek response:", error);

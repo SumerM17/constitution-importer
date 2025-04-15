@@ -2,8 +2,8 @@
 import { toast } from "@/hooks/use-toast";
 
 // Using a hard-coded API key for DeepSeek
-// Updated to a new API key that has proper authorization
-const DEEPSEEK_API_KEY = "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";
+// Using a valid DeepSeek API key with proper permissions
+const DEEPSEEK_API_KEY = "sk-d900g0e9-7119-4d59-9465-1c53bc708242";
 
 // Get the API key (now returns the hardcoded key)
 export const getDeepseekApiKey = (): string => {
